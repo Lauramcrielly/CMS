@@ -1,0 +1,96 @@
+# Regular steps have 4096 MB of memory in total, large build steps (which you can define using size: 2x) have 8192 MB in total.
+# The build container is given 1024 MB of the total memory, which covers your build process and some Pipelines overheads (agent container, logging, etc).
+# 1x <=> 4 GB, 2x <=> 8 GB, out of which 1024 - build, 512 - redis, 512 - mongo
+# More info: https://support.atlassian.com/bitbucket-cloud/docs/databases-and-service-containers/#UseservicesanddatabasesinBitbucketPipelines-Servicememorylimits
+image: python:3
+
+definitions:
+  docker:
+    services:
+      docker:
+        memory: 7168
+
+options:
+  docker: true
+
+# in the envvars, you need to define:
+# AWS_ACCESS_KEY_ID
+# AWS_SECRET_ACCESS_KEY
+# AWS_DEFAULT_REGION
+
+pipelines:
+  custom:
+    dev:
+      - step:
+          size: 2x
+          name: Deploy to AWS Elastic Container Service
+          deployment: Test
+          script:
+            - pip3 install awscli
+            - aws configure set aws_access_key_id "${AWS_ACCESS_KEY}"
+            - aws configure set aws_secret_access_key "${AWS_SECRET_ACCESS_KEY}"
+            - aws configure set region ${AWS_DEFAULT_REGION}
+            - eval $(aws ecr get-login --no-include-email | sed 's;https://;;g')
+            - docker build --platform linux/amd64 -t ${REPOSITORY_URL}:latest .
+            - docker push ${REPOSITORY_URL}:latest
+
+            - pipe: atlassian/aws-ecs-deploy:1.12.2
+              variables:
+                CLUSTER_NAME: $ECS_CLUSTER_NAME
+                SERVICE_NAME: $ECS_SERVICE_NAME
+                # TASK_DEFINITION: '<string>' # Optional.
+                FORCE_NEW_DEPLOYMENT: "true" # Optional.
+                WAIT: "true" # Optional.
+                # WAIT_INTERVAL: '<integer>' # Optional.
+                # WAIT_MAX_ATTEMPTS: '<integer>' # Optional.
+                # DEBUG: '<string>' # Optional.
+
+    staging:
+      - step:
+          size: 2x
+          name: Deploy to AWS Elastic Container Service
+          deployment: Staging
+          script:
+            - pip3 install awscli
+            - aws configure set aws_access_key_id "${AWS_ACCESS_KEY}"
+            - aws configure set aws_secret_access_key "${AWS_SECRET_ACCESS_KEY}"
+            - aws configure set region ${AWS_DEFAULT_REGION}
+            - eval $(aws ecr get-login --no-include-email | sed 's;https://;;g')
+            - docker build --platform linux/amd64 -t ${REPOSITORY_URL}:latest .
+            - docker push ${REPOSITORY_URL}:latest
+
+            - pipe: atlassian/aws-ecs-deploy:1.12.2
+              variables:
+                CLUSTER_NAME: $ECS_CLUSTER_NAME
+                SERVICE_NAME: $ECS_SERVICE_NAME
+                # TASK_DEFINITION: '<string>' # Optional.
+                FORCE_NEW_DEPLOYMENT: "true" # Optional.
+                WAIT: "true" # Optional.
+                # WAIT_INTERVAL: '<integer>' # Optional.
+                # WAIT_MAX_ATTEMPTS: '<integer>' # Optional.
+                # DEBUG: '<string>' # Optional.
+
+    production:
+      - step:
+          size: 2x
+          name: Deploy to AWS Elastic Container Service
+          deployment: Production
+          script:
+            - pip3 install awscli
+            - aws configure set aws_access_key_id "${AWS_ACCESS_KEY}"
+            - aws configure set aws_secret_access_key "${AWS_SECRET_ACCESS_KEY}"
+            - aws configure set region ${AWS_DEFAULT_REGION}
+            - eval $(aws ecr get-login --no-include-email | sed 's;https://;;g')
+            - docker build --platform linux/amd64 -t ${REPOSITORY_URL}:latest .
+            - docker push ${REPOSITORY_URL}:latest
+
+            - pipe: atlassian/aws-ecs-deploy:1.12.2
+              variables:
+                CLUSTER_NAME: $ECS_CLUSTER_NAME
+                SERVICE_NAME: $ECS_SERVICE_NAME
+                # TASK_DEFINITION: '<string>' # Optional.
+                FORCE_NEW_DEPLOYMENT: "true" # Optional.
+                WAIT: "true" # Optional.
+                # WAIT_INTERVAL: '<integer>' # Optional.
+                # WAIT_MAX_ATTEMPTS: '<integer>' # Optional.
+                # DEBUG: '<string>' # Optional.

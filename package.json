@@ -1,0 +1,46 @@
+{
+  "name": "euans-guide-cms",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A Strapi application",
+  "scripts": {
+    "build": "strapi build",
+    "deploy": "strapi deploy",
+    "develop": "strapi develop",
+    "dev": "strapi develop",
+    "seed:example": "node ./scripts/seed.js",
+    "start:prod": "strapi start",
+    "strapi": "strapi"
+  },
+  "dependencies": {
+    "@strapi/plugin-cloud": "5.2.0",
+    "@strapi/plugin-users-permissions": "5.2.0",
+    "@strapi/provider-upload-aws-s3": "^5.18.0",
+    "@strapi/strapi": "^5.10.0",
+    "better-sqlite3": "^11.6.0",
+    "fs-extra": "^10.0.0",
+    "mime-types": "^2.1.27",
+    "pg": "8.8.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^6.0.0",
+    "sharp": "^0.34.3",
+    "strapi-health-plugin": "^1.1.1",
+    "strapi-import-export": "^0.0.1",
+    "styled-components": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.7",
+    "@types/node": "^20.19.11",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=18.0.0 <=22.x.x",
+    "npm": ">=6.0.0"
+  },
+  "strapi": {
+    "uuid": "c61f7e02-d155-4fc3-bb37-776d984d7112"
+  }
+}
